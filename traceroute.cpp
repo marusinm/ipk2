@@ -86,9 +86,9 @@ int main(int argc, char **argv) {
 
     sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-    int hop = 2;
+    int hop;
     bool done = false;
-    for (hop = 1; hop <= params.max_ttl && done == false; hop++) {
+    for (hop = params.first_ttl; hop <= params.max_ttl && done == false; hop++) {
 
         bool traceFinished = false;
         if (result->ai_family == AF_INET) {  //IPv4
