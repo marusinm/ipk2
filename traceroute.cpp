@@ -90,6 +90,7 @@ int main(int argc, char **argv) {
     hints.ai_protocol=0;
     hints.ai_flags=AI_ADDRCONFIG;
     std::string port = "33434"; //on forum TODO: vyskusat aj port 4
+//    std::string port = "4"; //on forum TODO: vyskusat aj port 4
 
     if (int s = getaddrinfo(params.address.c_str(),port.c_str(),&hints, &result) != 0) {
         std::cerr << "getaddrinfo: %s" << gai_strerror(s) << "\n";
@@ -127,17 +128,17 @@ int main(int argc, char **argv) {
 //            std::cout << "ipv 6\n";
         }
 
-//        int r = connect(sock, result->ai_addr, result->ai_addrlen);
-//        if(r == -1){
-//            std::cerr << "connect() -1";
-//        }
+        int r = connect(sock, result->ai_addr, result->ai_addrlen);
+        if(r == -1){
+            std::cerr << "connect() -1";
+        }
 
         //try to send message
         const char *message = "PING";
         //FIXME: sendto by nemal potrebovat connect ale mozno ho tam nakoniec bude treba dat
         //FIXME: v tutoriali je napisane nieco ine, funkcia s piatimi parametrami, ako flag som pridal 0
-        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
-//        int test = (int) send(sock, message, strlen(message), 0);
+//        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
+        int test = (int) send(sock, message, strlen(message), 0);
 //        std::cout << "send " << test << " chars\n";
         // get time
 
@@ -192,7 +193,7 @@ int main(int argc, char **argv) {
             struct timeval time_res;
             timersub(&timeout1, &timeout, &time_res);
 //            std::cout<< "timeres: "<<time_res.tv_sec<<"\n";
-            if(time_res.tv_sec >= 2){
+            if(time_res.tv_sec >= 2){ // 2 seconds
 
                 std::cout<<hop<<"  * *\n";
                 break;
