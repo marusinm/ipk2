@@ -4,7 +4,6 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <netdb.h>
-
 #include <netinet/ip_icmp.h>
 #include <vector>
 #include <iomanip>
@@ -12,7 +11,6 @@
 #include <netinet/icmp6.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
-#include <math.h>
 
 //#include <sys/types.h>
 //#include <stdio.h>
@@ -84,6 +82,7 @@ int main(int argc, char **argv) {
         std::cerr << "getaddrinfo: %s" << gai_strerror(s) << "\n";
         return 6; //TODO: which result code out ?
     }
+    cout << "address: " << params.address << " port: " << port << "\n";
 
     sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
@@ -156,7 +155,7 @@ int main(int argc, char **argv) {
                 std::cout<<hop<<"  * *\n";
                 break;
             }
-            
+
             double ms = (double) (timeout1.tv_sec - timeout.tv_sec) * 1000.0 +
                  (double) (timeout1.tv_usec - timeout.tv_usec) / 1000.0;
 
@@ -262,7 +261,5 @@ int main(int argc, char **argv) {
         }
     }
 
-
     return 0;
-
 }
