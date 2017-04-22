@@ -11,6 +11,7 @@
 #include <linux/errqueue.h>
 #include <netinet/icmp6.h>
 #include <sys/time.h>
+#include <arpa/inet.h>
 
 //#include <sys/types.h>
 //#include <stdio.h>
@@ -126,17 +127,17 @@ int main(int argc, char **argv) {
 //            std::cout << "ipv 6\n";
         }
 
-        int r = connect(sock, result->ai_addr, result->ai_addrlen);
-        if(r == -1){
-            std::cerr << "connect() -1";
-        }
+//        int r = connect(sock, result->ai_addr, result->ai_addrlen);
+//        if(r == -1){
+//            std::cerr << "connect() -1";
+//        }
 
         //try to send message
         const char *message = "PING";
         //FIXME: sendto by nemal potrebovat connect ale mozno ho tam nakoniec bude treba dat
         //FIXME: v tutoriali je napisane nieco ine, funkcia s piatimi parametrami, ako flag som pridal 0
-//        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
-        int test = (int) send(sock, message, strlen(message), 0);
+        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
+//        int test = (int) send(sock, message, strlen(message), 0);
 //        std::cout << "send " << test << " chars\n";
         // get time
 
@@ -247,8 +248,8 @@ int main(int argc, char **argv) {
                     if (e && e->ee_origin == SO_EE_ORIGIN_ICMP) {
 
                         /* získame adresu - ak to robíte všeobecne tak sockaddr_storage */
-                        struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
-//                    struct sockaddr_storage *sin = (struct sockaddr_storage *) (e + 1);
+//                        struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
+                    struct sockaddr_storage *sin_unspec = (struct sockaddr_storage *) (e + 1);
 
                         //TODO: prepisat koment
                         /*
@@ -257,8 +258,9 @@ int main(int argc, char **argv) {
                         */
 
                         //TODO: toto je kod z poznamok, staihnuty z messangeru
-//                    if ( sin->ss_family == AF_INET) {
-                        if (sin->sin_family == AF_INET) {
+                    if ( sin_unspec->ss_family == AF_INET) {
+//                        if (sin->sin_family == AF_INET) {
+                            struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
                             traceFinished = true;
 //                            std::cout << "finish detection\n";
                             if ((e->ee_type == ICMP_DEST_UNREACH)) {  // 3
@@ -302,10 +304,23 @@ int main(int argc, char **argv) {
                                         int((sin->sin_addr.s_addr & 0xFF000000) >> 24) << "\n";
                             }
                         } else {
+
+                            struct sockaddr_in6 *sin = (struct sockaddr_in6 *) (e + 1);
                             if ((e->ee_type == ICMP6_DST_UNREACH)) {  // 1
                                 traceFinished = true;
                                 if (e->ee_code == ICMP6_DST_UNREACH_NOPORT) { //4
-                                    printf("HEJ, NOW DO SOMTING NEW\n");
+
+                                    struct sockaddr_in6 sa;
+                                    char str[INET6_ADDRSTRLEN];
+                                    inet_pton(AF_INET6, "2001:db8:8714:3a90::12", &(sa.sin6_addr));
+                                    inet_ntop(AF_INET6, &(sa.sin6_addr), str, INET6_ADDRSTRLEN);
+                                    printf("%s\n", str); // prints "2001:db8:8714:3a90::12"
+
+//                                    std::cout << hop << " " << int(sin->sin6_addr.s_addr & 0xFF) << "." <<
+//                                    int((sin->sin6_addr.s_addr & 0xFF00) >> 8) << "." <<
+//                                    int((sin->sin6_addr.s_addr & 0xFF0000) >> 16) << "." <<
+//                                    int((sin->sin6_addr.s_addr & 0xFF000000) >> 24) << "\n";
+//
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADDR) {  //3
                                     cout << "H!\n";
                                     break;
@@ -321,6 +336,12 @@ int main(int argc, char **argv) {
                                 } else {
                                     cout << "Destination Unreachable\n";
                                 }
+                            }else{
+                                struct sockaddr_in6 sa;
+                                char str[INET6_ADDRSTRLEN];
+                                inet_pton(AF_INET6, "2001:db8:8714:3a90::12", &(sa.sin6_addr));
+                                inet_ntop(AF_INET6, &(sa.sin6_addr), str, INET6_ADDRSTRLEN);
+                                printf("aa %s\n", str); // prints "2001:db8:8714:3a90::12"
                             }
                         }
 
