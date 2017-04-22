@@ -86,8 +86,6 @@ int main(int argc, char **argv) {
 
     sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-
-
     int hop = 2;
     bool done = false;
     for (hop = 1; hop <= params.max_ttl && done == false; hop++) {
@@ -104,17 +102,17 @@ int main(int argc, char **argv) {
             setsockopt(sock, SOL_IPV6, IPV6_RECVERR,(char*)&on, sizeof(on)); // osx to nepozna na docker to funguje
         }
 
-        int r = connect(sock, result->ai_addr, result->ai_addrlen);
-        if(r == -1){
-            std::cerr << "connect() -1";
-        }
+//        int r = connect(sock, result->ai_addr, result->ai_addrlen);
+//        if(r == -1){
+//            std::cerr << "connect() -1";
+//        }
 
         //try to send message
         const char *message = "PING";
         //FIXME: sendto by nemal potrebovat connect ale mozno ho tam nakoniec bude treba dat
         //FIXME: v tutoriali je napisane nieco ine, funkcia s piatimi parametrami, ako flag som pridal 0
-//        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
-        int test = (int) send(sock, message, strlen(message), 0);
+        int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
+//        int test = (int) send(sock, message, strlen(message), 0);
         if (test < 0){
             std::cerr << "sned() -1" ;
         }
