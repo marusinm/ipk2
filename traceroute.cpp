@@ -12,6 +12,7 @@
 #include <netinet/icmp6.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#include <math.h>
 
 //#include <sys/types.h>
 //#include <stdio.h>
@@ -155,6 +156,9 @@ int main(int argc, char **argv) {
                 std::cout<<hop<<"  * *\n";
                 break;
             }
+            
+            double ms = (double) (timeout1.tv_sec - timeout.tv_sec) * 1000.0 +
+                 (double) (timeout1.tv_usec - timeout.tv_usec) / 1000.0;
 
             if (res < 0) continue; //in case when message not arrived
 
@@ -190,7 +194,8 @@ int main(int argc, char **argv) {
                                     std::cout << hop << " " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24) << "\n";
+                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24)
+                                            << " "<< ms <<" ms\n";
     //                                printf("HEJ, NOW DO SOMTING NEW %s \n", ms );
                                 } else if (e->ee_code == ICMP_HOST_UNREACH) {  //1
                                     cout << "H!\n";
@@ -213,7 +218,8 @@ int main(int argc, char **argv) {
                                 std::cout << hop << " " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24) << "\n";
+                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24)
+                                        << " "<< ms <<" ms\n";
                             }
                         } else {
                             struct sockaddr_in6 *sin = (struct sockaddr_in6 *) (e + 1);
@@ -225,7 +231,8 @@ int main(int argc, char **argv) {
                                     done = true;
                                     char str[INET6_ADDRSTRLEN];
                                     inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                    cout << hop << " " << str << "\n";
+                                    cout << hop << " " << str
+                                    << " "<< ms <<" ms\n";
 
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADDR) {  //3
                                     cout << "H!\n";
@@ -242,10 +249,11 @@ int main(int argc, char **argv) {
                                 } else {
                                     cout << "Destination Unreachable\n";
                                 }
-                            }else{
+                            }else {
                                 char str[INET6_ADDRSTRLEN];
                                 inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                cout << hop << " " << str << "\n";
+                                cout << hop << " " << str
+                                << " " << ms << " ms\n";
                             }
                         }
                     }
