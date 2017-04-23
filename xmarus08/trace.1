@@ -1,0 +1,87 @@
+.TH TRACEROUTE 1
+
+.SH NAME
+traceroute - network utility
+
+.SH SYNOPSIS
+.B trace
+[\fB\-f\fR \fIfirst_ttl\fR]
+[\fB\-m\fR \fImax_ttl\fR]
+.IR ip-address
+
+.SH DESCRIPTION
+.B traceroute
+is a utility that records the route (the specific gateway computers at each hop) through the Internet between your computer and a specified destination computer. It also calculates and displays the amount of time each hop took. Traceroute is a handy tool both for understanding where problems are in the Internet network and for getting a detailed sense of the Internet itself. Another utility, PING, is often used prior to using traceroute to see whether a host is present on the network.
+
+.SH OPTIONS
+.TP
+.BR \-f ", " \-m
+Set first TTL hop and max TTL hop
+by default: first ttl = 1, max ttl = 30
+
+.SH BUGS
+No any bugs here! :D
+
+.SH EXTENSION
+DNS translation is implemented!
+
+.SH FILES    
+
+.B Makefile
+- standard makefile.
+.br
+.B trace.1 
+- documentation.
+.br
+.B traceroute.cpp 
+- source code.
+
+.SH IMPLEMENTATION PART
+
+Firstly there are standard options handling in begginng of 
+.B traceroute.cpp
+and filling 
+.B struct params
+with this data via 
+.B getParams
+function.
+.br
+.B main
+funcion is core of traceroute.cpp and perform all functionality. Firstly we fill 
+.B addrinfo hints
+where we sets
+.B SOCK_DGRAM
+and other usefull flags. Then new socket is created and the cyckle from first ttl to max ttl starts iterate. Program checks if we perform for IPv4 or IPv6 on many places, we use different structs and tags for these two protocols. 
+.br 
+Socket is send via sendto() function and receives data in recvmsg() function.  
+.B getnameinfo()
+function is used for extracts host name from IP address and
+.B getaddrinfo() 
+for extracts IP from host name.
+
+
+
+.SH SOURCES
+
+.B References from which I came:
+.br
+- https://www.tutorialspoint.com/cplusplus/ 
+.br
+- http://www.haifux.org/lectures/217/netLec5.pdf
+.br
+- http://stackoverflow.com/
+.br
+- https://tools.ietf.org/html/rfc7231
+.br
+- http://liw.fi/manpages/
+.br
+- https://guides.github.com/features/mastering-markdown/
+.br
+- http://www.tldp.org/HOWTO/Man-Page/q3.html
+.br
+- IPK WIKI
+
+.br
+Autor: Marušin Marek, xmarus08
+.br
+Date: 23.04.2017
