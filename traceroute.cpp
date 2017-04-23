@@ -60,6 +60,21 @@ Params getParams(int argc, char **argv) {
     return params;
 }
 
+/**
+// * round double to n digits
+// * @param x - double to round
+// * @param dexDigits - round double to n digits
+// */
+//double showDecimals(const double& x, const int& numDecimals) {
+//    int y=x;
+//    double z=x-y;
+//    double m=pow(10,numDecimals);
+//    double q=z*m;
+//    double r=round(q);
+//
+//    return static_cast<double>(y)+(1.0/m)*r;
+//}
+
 int main(int argc, char **argv) {
 
     //get params from cmd
@@ -76,13 +91,11 @@ int main(int argc, char **argv) {
     hints.ai_protocol=0;
     hints.ai_flags=AI_ADDRCONFIG;
     std::string port = "33434"; //on forum TODO: vyskusat aj port 4
-//    std::string port = "4"; //on forum TODO: vyskusat aj port 4
 
     if (int s = getaddrinfo(params.address.c_str(),port.c_str(),&hints, &result) != 0) {
         std::cerr << "getaddrinfo: %s" << gai_strerror(s) << "\n";
         return 6; //TODO: which result code out ?
     }
-    cout << "address: " << params.address << " port: " << port << "\n";
 
     sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
@@ -151,8 +164,9 @@ int main(int argc, char **argv) {
 
             struct timeval time_res;
             timersub(&timeout1, &timeout, &time_res);
+
             if(time_res.tv_sec >= 2){ // 2 seconds
-                std::cout<<hop<<"  * *\n";
+                std::cout<<hop<<"\t*\n";
                 break;
             }
 
@@ -190,12 +204,12 @@ int main(int argc, char **argv) {
                                     done = true;
                                     //TODO: dalo by sa to prepisat na jednoduchsie riesenie cez inet_ntop
                                     // ale programoval som to este v tedy ke som bol v tom ze netdb sa nemoze pouzivat
-                                    std::cout << hop << " " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
+                                    std::cout << hop << "   " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24)
-                                            << " "<< ms <<" ms\n";
-    //                                printf("HEJ, NOW DO SOMTING NEW %s \n", ms );
+                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24);
+                                            printf("\t%0.3lf %s\n", ms, " ms");
+//                                            << std::setprecision(3) << ms << "\tms" << "\n";
                                 } else if (e->ee_code == ICMP_HOST_UNREACH) {  //1
                                     cout << "H!\n";
                                     break;
@@ -214,11 +228,12 @@ int main(int argc, char **argv) {
                             } else {
                                 //TODO: dalo by sa to prepisat na jednoduchsie riesenie cez inet_ntop
                                 // ale programoval som to este v tedy ke som bol v tom ze netdb sa nemoze pouzivat
-                                std::cout << hop << " " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
+                                std::cout << hop << "\t" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24)
-                                        << " "<< ms <<" ms\n";
+                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24);
+                                printf("\t%.03lf %s\n", ms, " ms");
+//                                << std::setprecision(3) << ms << "\tms" << "\n";
                             }
                         } else {
                             struct sockaddr_in6 *sin = (struct sockaddr_in6 *) (e + 1);
@@ -230,8 +245,8 @@ int main(int argc, char **argv) {
                                     done = true;
                                     char str[INET6_ADDRSTRLEN];
                                     inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                    cout << hop << " " << str
-                                    << " "<< ms <<" ms\n";
+                                    cout << hop << "\t" << str;
+                                  printf("\t%.03lf %s\n", ms, " ms");
 
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADDR) {  //3
                                     cout << "H!\n";
@@ -251,8 +266,8 @@ int main(int argc, char **argv) {
                             }else {
                                 char str[INET6_ADDRSTRLEN];
                                 inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                cout << hop << " " << str
-                                << " " << ms << " ms\n";
+                                cout << hop << "\t" << str;
+                                printf("\t%.03lf %s\n", ms, " ms");
                             }
                         }
                     }
