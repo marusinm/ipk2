@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
         int test = (int) sendto(sock, message, strlen(message), 0, result->ai_addr, result->ai_addrlen);
 //        int test = (int) send(sock, message, strlen(message), 0);
         if (test < 0){
-            std::cerr << "sned() -1" ;
+            std::cerr << "send() -1" ;
         }
 
         struct timeval timeout;
@@ -174,72 +174,74 @@ int main(int argc, char **argv) {
                         if ( sin_unspec->ss_family == AF_INET) { //flags for ipv4
                             struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
                             traceFinished = true;
+                            //TODO: rewrite to inet_ntop
+                            std::cout << hop << "\t "<< host << " (" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
+                            int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
+                            int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
+                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24)<<")";
+
                             if ((e->ee_type == ICMP_DEST_UNREACH)) {  // 3
                                 if (e->ee_code == ICMP_PORT_UNREACH) { //3
                                     done = true;
-
-                                    //TODO: rewrite to inet_ntop
-                                    std::cout << hop << "\t "<< host << " (" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24)<<")";
-                                            printf("\t%0.3lf %s\n", ms, " ms");
+                                    printf("\t%0.3lf %s\n", ms, " ms");
                                 } else if (e->ee_code == ICMP_HOST_UNREACH) {  //1
-                                    cout << "H!\n";
+                                    cout << "\tH!\n";
                                     break;
                                 } else if (e->ee_code == ICMP_NET_UNREACH) {  // 0
-                                    cout << "N!\n";
+                                    cout << "\tN!\n";
                                     break;
                                 } else if (e->ee_code == ICMP_PROT_UNREACH) { // protocol // 2
-                                    cout << "P!\n";
+                                    cout << "\tP!\n";
                                     break;
                                 } else if (e->ee_code == ICMP_PKT_FILTERED) { // communication admini. prohi. // 13
-                                    cout << "X!\n";
+                                    done = true;
+                                    printf("\tX!\n");
+
+                                    break;
+                                } else if (e->ee_code == 10) {
+                                    done = true;
+                                    printf("\tX!\n");
+
                                     break;
                                 } else {
                                     cout << "Destination Unreachable\n";
                                 }
                             } else {
-
-                                //TODO: rewrite to inet_ntop
-                                std::cout << hop << "\t " << host << " (" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24)<<")";
                                 printf("\t%.03lf %s\n", ms, " ms");
                             }
                         } else { //flags for ipv6
                             struct sockaddr_in6 *sin = (struct sockaddr_in6 *) (e + 1);
                             traceFinished = true;
+                            char str[INET6_ADDRSTRLEN];
+                            inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
+                            cout << hop << "\t " << host << " (" << str << ")";
 
                             if ((e->ee_type == ICMP6_DST_UNREACH)) {  // 1
-                                if (e->ee_code == ICMP6_DST_UNREACH_NOPORT) { //4
-
+                                if (e->ee_code == ICMP6_DST_UNREACH_NOPORT) {
                                     done = true;
-                                    char str[INET6_ADDRSTRLEN];
-                                    inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                    cout << hop << "\t " << host << " (" << str << ")";
-                                  printf("\t%.03lf %s\n", ms, " ms");
+                                    printf("\t%.03lf %s\n", ms, " ms");
 
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADDR) {  //3
-                                    cout << "H!\n";
+                                    cout << "\tH!\n";
                                     break;
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_NOROUTE) {  // 0
-                                    cout << "N!\n";
+                                    cout << "\tN!\n";
                                     break;
                                 } else if (e->ee_code == 7) { // protocol // Error in Source Routing Header // 7
-                                    cout << "P!\n";
+                                    cout << "\tP!\n";
                                     break;
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADMIN) { // communication admini. prohi. // 1
-                                    cout << "X!\n";
+                                    done = true;
+                                    cout << "\tX!\n";
                                     break;
-                                } else {
+                                } else if (e->ee_code == 10) {
+                                    done = true;
+                                    printf("\tX!\n");
+                                    break;
+                                }else {
                                     cout << "Destination Unreachable\n";
                                 }
                             }else {
-                                char str[INET6_ADDRSTRLEN];
-                                inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                cout << hop << "\t " << host << " (" << str << ")";
                                 printf("\t%.03lf %s\n", ms, " ms");
                             }
                         }
