@@ -195,6 +195,13 @@ int main(int argc, char **argv) {
 //                        struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
                         struct sockaddr_storage *sin_unspec = (struct sockaddr_storage *) (e + 1);
 
+
+//                        getnameinfo(const struct sockaddr *addr, socklen_t addrlen,
+//                                char *host, socklen_t hostlen,
+//                                char *serv, socklen_t servlen, int flags);
+                        char host[1024];
+                        getnameinfo((struct sockaddr*) sin_unspec, sizeof(struct sockaddr_storage), host, sizeof(host), NULL, 0, 0);
+
                             //TODO: toto je kod z poznamok, staihnuty z messangeru
                         if ( sin_unspec->ss_family == AF_INET) {
                             struct sockaddr_in *sin = (struct sockaddr_in *) (e + 1);
@@ -204,10 +211,10 @@ int main(int argc, char **argv) {
                                     done = true;
                                     //TODO: dalo by sa to prepisat na jednoduchsie riesenie cez inet_ntop
                                     // ale programoval som to este v tedy ke som bol v tom ze netdb sa nemoze pouzivat
-                                    std::cout << hop << "   " << int(sin->sin_addr.s_addr & 0xFF) << "." <<
+                                    std::cout << hop << "\t "<< host << " (" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                             int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24);
+                                            int((sin->sin_addr.s_addr & 0xFF000000) >> 24)<<")";
                                             printf("\t%0.3lf %s\n", ms, " ms");
 //                                            << std::setprecision(3) << ms << "\tms" << "\n";
                                 } else if (e->ee_code == ICMP_HOST_UNREACH) {  //1
@@ -228,10 +235,10 @@ int main(int argc, char **argv) {
                             } else {
                                 //TODO: dalo by sa to prepisat na jednoduchsie riesenie cez inet_ntop
                                 // ale programoval som to este v tedy ke som bol v tom ze netdb sa nemoze pouzivat
-                                std::cout << hop << "\t" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
+                                std::cout << hop << "\t " << host << " (" << int(sin->sin_addr.s_addr & 0xFF) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF00) >> 8) << "." <<
                                         int((sin->sin_addr.s_addr & 0xFF0000) >> 16) << "." <<
-                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24);
+                                        int((sin->sin_addr.s_addr & 0xFF000000) >> 24)<<")";
                                 printf("\t%.03lf %s\n", ms, " ms");
 //                                << std::setprecision(3) << ms << "\tms" << "\n";
                             }
@@ -245,7 +252,7 @@ int main(int argc, char **argv) {
                                     done = true;
                                     char str[INET6_ADDRSTRLEN];
                                     inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                    cout << hop << "\t" << str;
+                                    cout << hop << "\t " << host << " (" << str << ")";
                                   printf("\t%.03lf %s\n", ms, " ms");
 
                                 } else if (e->ee_code == ICMP6_DST_UNREACH_ADDR) {  //3
@@ -266,7 +273,7 @@ int main(int argc, char **argv) {
                             }else {
                                 char str[INET6_ADDRSTRLEN];
                                 inet_ntop(AF_INET6, &sin->sin6_addr, str, INET6_ADDRSTRLEN);
-                                cout << hop << "\t" << str;
+                                cout << hop << "\t " << host << " (" << str << ")";
                                 printf("\t%.03lf %s\n", ms, " ms");
                             }
                         }
